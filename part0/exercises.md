@@ -29,7 +29,7 @@ sequenceDiagram
   server->>browser: status code 302
   Note left of browser: browser reloads the page, triggering 3 more requests
   browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
-  server-->browser: main.css
+  server->>browser: main.css
 
   browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
   server->>browser: main.js
