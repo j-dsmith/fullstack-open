@@ -11,26 +11,17 @@ const App = () => {
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
-  const [notificationType, setNotificationType] = useState("");
-  const [notificationMessage, setNotificationMessage] = useState("");
+  const [notificationInfo, setNotificationInfo] = useState({});
 
   useEffect(() => {
     getAllPersons();
   }, []);
 
-  const handleShowNotification = (name, type) => {
-    const notificationText = {
-      create: `${name} succesfully added`,
-      update: `${name} sucessfully updated`,
-      delete: `${name} succesfully deleted`,
-      error: `Information for ${name} was already deleted from the server`,
-    };
-
-    setNotificationType(type);
-    setNotificationMessage(notificationText[type]);
-
+  const handleShowNotification = (message, type) => {
+    console.log(message, type);
+    setNotificationInfo({ message, type });
     setTimeout(() => {
-      setNotificationType(null);
+      setNotificationInfo({ ...notificationInfo, type: null });
     }, 5000);
   };
 
@@ -46,7 +37,7 @@ const App = () => {
   const handleDelete = (id, name) => {
     if (window.confirm(`Are you sure you want to remove ${name}`))
       phonebookService.remove(id).then(() => {
-        handleShowNotification(name, "delete");
+        handleShowNotification(`${name} succesfully deleted`, "success");
       });
     getAllPersons();
   };
@@ -64,20 +55,29 @@ const App = () => {
     phonebookService
       .update(idToUpdate, newPerson)
       .then((updatedPerson) => {
-        handleShowNotification(updatedPerson.name, "update");
+        handleShowNotification(`${updatedPerson.name} sucessfully updated`, "success");
       })
       .catch((err) => {
-        handleShowNotification(newPerson.name, "error");
+        handleShowNotification(
+          `Information for ${newPerson.name} was already deleted from the server`,
+          "error"
+        );
       });
     getAllPersons();
   };
 
   const handleCreatePerson = (newPerson) => {
-    phonebookService.create(newPerson).then((returnedPerson) => {
-      setPersons(persons.concat(returnedPerson));
-      setPersonsToShow(persons.concat(returnedPerson));
-      handleShowNotification(newPerson.name, "create");
-    });
+    phonebookService
+      .create(newPerson)
+      .then((returnedPerson) => {
+        setPersons(persons.concat(returnedPerson));
+        setPersonsToShow(persons.concat(returnedPerson));
+        handleShowNotification(`${returnedPerson.name} succesfully added`, "create");
+      })
+      .catch((err) => {
+        const { error } = err.response.data;
+        handleShowNotification(error, "error");
+      });
     getAllPersons();
   };
 
@@ -107,14 +107,13 @@ const App = () => {
   const resetFieldsAndNotificationState = () => {
     setNewName("");
     setNewNumber("");
-    setNotificationMessage("");
-    setNotificationType("");
+    setNotificationInfo("");
   };
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notificationMessage} type={notificationType} />
+      <Notification info={notificationInfo} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>add a new</h2>
       <PhoneBookForm

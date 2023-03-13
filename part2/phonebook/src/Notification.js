@@ -1,4 +1,4 @@
-const Notification = ({ message, type }) => {
+const Notification = ({ info: { message, type } }) => {
   const accentColor = type === "error" ? "red" : "green";
   const notificationClasses = {
     background: "hsl(0deg 3% 75%)",
